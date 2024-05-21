@@ -65,15 +65,18 @@ ispObj = CEA_Obj(oxName='LOX', fuelName='LCO')
 
 
 # Isp vs eps
-# ispArr = []
-# epsL = range(1,41,1)
-# for eps in epsL:
-#     ispArr.append( ispObj.get_IvacCstrTc_ThtMwGam(Pc=435.113213, MR=0.571, eps=eps)[0] )
-#
-# plot(epsL, ispArr, label='Pc=30 bar; O/F=0.571')
-# legend(loc='best')
-# grid(True)
-# title( ispObj.desc )
-# xlabel( 'Nozzle Expansion Area Ratio' )
-# ylabel( 'Isp' )
-# show()
+ispArr = []
+epsL = range(1,201,1)
+for eps in epsL:
+    ispArr.append( ispObj.get_IvacCstrTc_ThtMwGam(Pc=435.113213, MR=0.571, eps=eps)[0] )
+
+plot(epsL, ispArr, label='Pc=30 bar; O/F=0.571')
+legend(loc='best')
+grid(True)
+title( ispObj.desc )
+xlabel( 'Nozzle Expansion Area Ratio' )
+ylabel( 'Isp' )
+show()
+
+
+# print( ispObj.get_eps_at_PcOvPe(Pc=435.113213, MR=0.5, PcOvPe=(30*10**5)/700, frozen=0, frozenAtThroat=0) )
