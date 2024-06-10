@@ -1,9 +1,7 @@
 import numpy as np
 import CoolProp.CoolProp as CP
 
-fluid = 'CARBONMONOXIDE'
-pressure_at_critical_point = CP.PropsSI(fluid,'pcrit')
-print(pressure_at_critical_point)
+CO = 'CARBONMONOXIDE'
 
 # #############################
 # #______input parameters_____#
@@ -21,6 +19,14 @@ print(pressure_at_critical_point)
 # D_c = 
 # eta_c = 
 # Pr_f = 
+
+def get_fuel_properties(temp, pressure, substance):
+    Cp = CP.PropsSI('C', 'T', temp, 'P', pressure, substance) #fetch the Cp in J/kgK
+    #rho = CP.PropSI()
+    return Cp
+
+print(get_fuel_properties(293, 100000, CO))
+
 
 
 
