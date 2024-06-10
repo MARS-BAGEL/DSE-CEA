@@ -21,6 +21,11 @@ def get_combustion_properties():
     fac_CR = 55.16**2 / 18.52**2  # Chamber area / Throat area
     gamma = ispObj.get_Chamber_MolWt_gamma(Pc=Pc, MR=MR, eps=eps)[1] # specific heat ratio
     Mach = ispObj.get_Chamber_MachNumber(Pc=Pc, MR=MR, fac_CR=fac_CR) # Mach No. 
-    cp, miu, k, Pr = ispObj.get_Chamber_Transport(Pc=Pc, MR=MR, eps=eps, frozen=0) # heat capacity, viscosity, thermal conductivity, Prandtl number
+    cp, miu, k, Pr = ispObj.get_Chamber_Transport(Pc=Pc, MR=MR, eps=eps, frozen=0) # heat capacity, dynamics viscosity, thermal conductivity, Prandtl number
 
-    return gamma, Mach, cp, miu, k, Pr 
+    # unit conversion
+    cp = cp * 4186.8        # J/(KG)(K)
+    miu  =  miu * 0.0001    # Pa·s
+    k = k * 0.0000024       # W/(m)(K)
+    
+    return gamma, Mach, cp, miu, k, Pr
