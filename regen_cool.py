@@ -2,9 +2,7 @@ import numpy as np
 from rocketcea.cea_obj import CEA_Obj, add_new_fuel
 import CoolProp.CoolProp as CP
 
-fluid = 'CARBONMONOXIDE'
-pressure_at_critical_point = CP.PropsSI(fluid,'pcrit')
-print(pressure_at_critical_point)
+CO = 'CARBONMONOXIDE'
 
 # #############################
 # #______input parameters_____#
@@ -19,9 +17,9 @@ print(pressure_at_critical_point)
 # mdot_f = #import from other file
 # k_c = #import from other file
 # Cp_c = #import from other file
-# D_c =
-# eta_c =
-# Pr_f =
+# D_c = 
+# eta_c = 
+# Pr_f = 
 
 
 # Add LCO as a prop
