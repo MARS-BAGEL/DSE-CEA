@@ -3,7 +3,7 @@ import numpy as np
 from rocketcea.cea_obj import CEA_Obj, add_new_fuel
 import CoolProp.CoolProp as CP
 
-def get_combustion_properties():
+def get_combustion_properties():  #EDIT TO ACCOUNT FOR CHANGES WITH EACH STAGE
     # Add LCO as a prop
     card_str = """
     fuel CO(L)  C 1.0   O 1.0     wt%=100.00
@@ -12,7 +12,7 @@ def get_combustion_properties():
     add_new_fuel( 'LCO', card_str )
 
     # General information
-    Pc = 25     # chamber pressure [bar]
+    Pc = 15     # chamber pressure [bar]
     MR = 0.55   # O/F ratio
     eps = 262   # Exit area / Throat area
     ispObj = CEA_Obj(propName='', oxName='LOX', fuelName='LCO')
@@ -29,3 +29,5 @@ def get_combustion_properties():
     k = k * 0.0000024       # W/(m)(K)
     
     return gamma, Mach, cp, miu, k, Pr
+
+get_combustion_properties()
