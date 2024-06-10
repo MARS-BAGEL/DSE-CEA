@@ -12,11 +12,13 @@ T_c = 3300 #combustion temperature [K] #IMPORT FROM PREV FILE?
 T_wall0 = 293 #initial wall temperature [K]
 T_f0 = 100 #initial fuel temperature [K]
 gamma_c, mach_c, Cp_c, mu_c, k_c, Pr_c = get_combustion_properties()
-mdot_c = 0.5714 #mass flow [kg/s] taken from SSOT 
-# mdot_f = #import from other file
-# D_c = 
-# D_f = 
-# eta_c = 
+mdot_c = 0.529 #total mass flow [kg/s] (from SSOT)
+OF = 0.5714 #O/F ratio [-] taken from SSOT
+mdot_f = mdot_c/(OF + 1) #mass flow of fuel [kg/s]  #CHECK IF CORRECT 
+D_c = 0.1 #diameter of chamber [m] #MAKE MORE ACCURATE LATER 
+D_f = 0.008 #diameter of fuel cooland channels [m]
+eta_c = 0.92 #combustion efficiency [-] #from sparrow paper, perform sensitivity analysis later 
+
 
 def get_fuel_properties(temp, pressure, substance):
     cp = CP.PropsSI('C', 'T', temp, 'P', pressure, substance) #get the Cp in [kJ/kgK]
