@@ -39,9 +39,15 @@ def get_CO_dynamic_visc(temp, stage):
     #coolprop unfortunately does not have viscocity model for CO
 
     if stage == 2: #calculations done at 15 bar for upper stage
-        if temp>115:
-            print('BOMBOCLART this bitch finna vapourise')
-            exit()
+        if isinstance(temp, (int, float)): #need this so that it accepts both ints/floats and arrays
+            if temp>115:
+                print('BOMBOCLART this bitch finna vapourise')
+                exit()
+        elif isinstance(temp, np.ndarray):
+            if temp.any()>115:
+                print('BOMBOCLART this bitch finna vapourise')
+                exit()
+
         viscosity_values = np.array([
         9.4763e-05, 9.2101e-05, 8.9522e-05, 8.7028e-05, 8.4589e-05, 8.2232e-05, 7.9917e-05,
         7.7666e-05, 7.5465e-05, 7.3308e-05, 7.1191e-05, 6.9107e-05, 6.7052e-05, 6.5026e-05,
@@ -67,9 +73,14 @@ def get_CO_conductivity(temp, stage):
     #coolprop unfortunately does not have viscocity model for CO
 
     if stage == 2: #calculations done at 15 bar for upper stage
-        if temp>115:
-            print('BOMBOCLART this bitch finna vapourise')
-            exit()
+        if isinstance(temp, (int, float)): #need this so that it accepts both ints/floats and arrays
+            if temp>115:
+                print('BOMBOCLART this bitch finna vapourise')
+                exit()
+        elif isinstance(temp, np.ndarray):
+            if temp.any()>115:
+                print('BOMBOCLART this bitch finna vapourise')
+                exit()
         conductivity_values = np.array([
         0.10841, 0.10658, 0.10474, 0.10290, 0.10106, 0.099202, 0.097340, 
         0.095469, 0.093588, 0.091696, 0.089791, 0.087871, 0.085943, 0.083979,

@@ -44,12 +44,6 @@ unit_mass_fluid = unit_length*np.pi*((0.5*D_f)**2)*gas_fluid_properties.get_fuel
 
 dt = unit_mass_fluid/mdot_f #maybe I'm stupid but I do this so that in one time step 1 unit mass shifts from 1 node to the next so that all the properties can like shift down the array 
 
-
-#############################
-#Set up initial temperature arrays
-#############################
-
-
 #############################
 #Define other functions
 #############################
@@ -118,6 +112,7 @@ def simulate():
 
     #simulation loop
     while time < burn_time:
+        print('whatsss gooooood')
         dT_L, dT_R, dT_f = get_temp_changes(T_L, T_R, T_f) #calculate all the stuff and change the temperatures accordingly
         T_L += dT_L
         T_R += dT_R 
