@@ -109,11 +109,30 @@ def get_temp_changes(T_left, T_right, T_fuel):
 
     return delta_T_left, delta_T_right, delta_T_fuel
 
+def shift_array(arr): #use to shift the array of fluid temperatures to show how the mass flows 
+    shifted_arr = np.empty_like(arr)
+    shifted_arr[0] = T_f0 #assume new fluid at the initial fluid temperature flows into the cooling channel
+    shifted_arr[1:] = arr[:-1]
+    return shifted_arr
+
 def simulate():
     while time < burn_time:
-        T_L, T_R, T_f += get_temp_changes(T_L, T_R, T_f)
-        
-    return 0 
+        T_L, T_R, T_f += get_temp_changes(T_L, T_R, T_f) #calculate all the stuff and change the temperatures accordingly
+        T_f = shift_array(T_f) #shift the fluid temperature array since the fluid flows innit
+        time += dt
+    return T_L, T_R, T_f 
+
+def main():
+    T_L_final, T_R_final, T_f_final = simulate()
+    print(T_L_final)
+
+
+#############################
+#run it
+#############################
+
+if __name__ == "__main__":
+    main()
 
 
 
