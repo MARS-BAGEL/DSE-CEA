@@ -94,16 +94,3 @@ def get_fuel_properties(temp, pressure, substance, stage):
     mu = get_CO_dynamic_visc(temp, stage) #get dynamic viscocity in [Pa-s] 
     k = get_CO_conductivity(temp, stage) #get thermal conductivity in [kW/m/K]
     return cp, rho, mu, k
-
-
-def shift_array(arr):
-    shifted_arr = np.empty_like(arr)
-    shifted_arr[0] = 100
-    shifted_arr[1:] = arr[:-1]
-    return shifted_arr
-
-yo = np.array([1,2,3,4,5,6,7,8,9,10])
-
-print(yo)
-yo = shift_array(yo)
-print(yo)

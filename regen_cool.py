@@ -14,7 +14,6 @@ CO = 'CarbonMonoxide'
 stage = 2 #enter 1 for first stage engine, 2 for second stage engine
 burn_time = 200 #[s]
 dt = 0.01 #[s] - timestep used for simulation 
-time = 0 #[s] - start time
 
 #geometry/wall
 D_c = 0.1 #diameter of chamber [m] #MAKE MORE ACCURATE LATER 
@@ -49,12 +48,6 @@ dt = unit_mass_fluid/mdot_f #maybe I'm stupid but I do this so that in one time 
 #############################
 #Set up initial temperature arrays
 #############################
-
-T_L = T_wall0*np.ones(n_nodes) #temperature of nodes representing left side of wall (next to combustion chamber)
-
-T_R = T_wall0*np.ones(n_nodes) #temperature of nodes representing right side of wall (next to cooling channel)
-
-T_f = T_f0*np.ones(n_nodes) #temperature of nodes representing fluid in cooling channel 
 
 
 #############################
@@ -116,8 +109,19 @@ def shift_array(arr): #use to shift the array of fluid temperatures to show how 
     return shifted_arr
 
 def simulate():
+
+    #setup initial arrays
+    T_L = T_wall0*np.ones(n_nodes) #temperature of nodes representing left side of wall (next to combustion chamber)
+    T_R = T_wall0*np.ones(n_nodes) #temperature of nodes representing right side of wall (next to cooling channel)
+    T_f = T_f0*np.ones(n_nodes) #temperature of nodes representing fluid in cooling channel 
+    time = 0
+
+    #simulation loop
     while time < burn_time:
-        T_L, T_R, T_f += get_temp_changes(T_L, T_R, T_f) #calculate all the stuff and change the temperatures accordingly
+        dT_L, dT_R, dT_f = get_temp_changes(T_L, T_R, T_f) #calculate all the stuff and change the temperatures accordingly
+        T_L += dT_L
+        T_R += dT_R 
+        T_f += dT_f
         T_f = shift_array(T_f) #shift the fluid temperature array since the fluid flows innit
         time += dt
     return T_L, T_R, T_f 
