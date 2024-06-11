@@ -4,6 +4,7 @@ import gas_fluid_properties
 import CoolProp.CoolProp as CP
 
 CO = 'CarbonMonoxide'
+O2 = 'OXYGEN'
 #start of array is at nozzle exit, end of array is at injector, this way it follows the flow of fuel
 
 #############################
@@ -13,12 +14,12 @@ CO = 'CarbonMonoxide'
 #general 
 stage = 2 #enter 1 for first stage engine, 2 for second stage engine
 burn_time = 200 #[s]
-dt = 0.01 #[s] - timestep used for simulation 
 
 #geometry/wall
-D_c = 0.04125 #diameter of chamber [m]
-D_f = 0.008 #diameter of fuel cooland channels [m]
-t = 0.01 #thickness of engine between combustion and cooling channel [m] 
+D_c = 0.1 #diameter of chamber [m] #MAKE MORE ACCURATE LATER 
+D_f = 0.008 #diameter of fuel coolant channels [m]
+t = 0.003 #thickness of engine between combustion and cooling channel [m] 
+l_engine = 1.0 #total length of engine [m]
 l_tot = 0.7 #total length of cooling channel [m]
 n_nodes = 100 #number of different nodes the channel is split into for simulation [-]
 k_wall = 6.5 #thermal conductivity of wall [W/m*K] https://www.azom.com/article.aspx?ArticleID=4459
@@ -30,17 +31,17 @@ unit_area = unit_length*unit_width #[m^2] #this is area for heat transfer, not c
 unit_mass_wall = unit_area*t*rho_wall/2 #mass per node of wall used to calculate temp increase, /2 because there are 2 nodes: left and right
 
 #thermal/fluid
-T_c = 3300 #combustion temperature [K]
+T_c = 3300 #combustion temperature [K] #IMPORT FROM PREV FILE?
 T_wall0 = 293 #initial wall temperature [K]
 T_f0 = 100 #initial fuel temperature [K]
 gamma_c, mach_c, Cp_c, mu_c, k_c, Pr_c = gas_fluid_properties.get_combustion_properties() #fetch properties of gas in combustion chamber 
 r = Pr_c**(1/3) #EDIT LATER TO DIFFERENCIATE COMBUSTION CHAMBER AND THROAT 
 T_aw = T_c*(1 + r*0.5*(gamma_c-1)*(mach_c**2)) #ablative wall temperature [K] (accounts for fluid slowing down near wall)
-mdot_c = 0.151 #total mass flow [kg/s] (from SSOT)
+mdot_c = 0.529 #total mass flow [kg/s] (from SSOT)
 OF = 0.5714 #O/F ratio [-] taken from SSOT
 mdot_f = mdot_c/(OF + 1) #mass flow of fuel [kg/s]  #CHECK IF CORRECT 
-eta_c = 0.88 #combustion efficiency [-] #from sparrow paper, perform sensitivity analysis later
-unit_mass_fluid = unit_length*np.pi*((0.5*D_f)**2)*gas_fluid_properties.get_fuel_properties(T_f0, 1500000, CO, 2)[1] #[kg], we'll just assume constant density throughout the process for the unit mass
+eta_c = 0.92 #combustion efficiency [-] #from sparrow paper, perform sensitivity analysis later 
+unit_mass_fluid = unit_length*np.pi*((0.5*D_f)**2)*gas_fluid_properties.get_fuel_properties(T_f0, 1500000, O2, 2)[1] #[kg], we'll just assume constant density throughout the process for the unit mass
 
 dt = unit_mass_fluid/mdot_f #maybe I'm stupid but I do this so that in one time step 1 unit mass shifts from 1 node to the next so that all the properties can like shift down the array 
 
@@ -77,7 +78,7 @@ def get_delta_T(Q, m, c):
 def get_temp_changes(T_left, T_right, T_fuel):
     #calculate all the heat transfers  
     h_alpha_hot = get_gas_convectivity(T_left) #convectivity between combustion chamber and wall 
-    h_alpha_cold = get_fuel_convectivity(T_fuel, 1500000, CO, 2) #convectivity between fuel and wall 
+    h_alpha_cold = get_fuel_convectivity(T_fuel, 1500000, O2, 2) #convectivity between fuel and wall 
     Q_convection_hot = get_convective_heat_transfer(T_aw, T_left, h_alpha_hot) #heat transfered [W] between wall and comubstion gas
     Q_convection_cold = get_convective_heat_transfer(T_right, T_fuel, h_alpha_cold) #heat transfered [W] between wall and fuel
     Q_conduction = get_conductive_heat_transfer(T_left, T_right)
@@ -91,7 +92,7 @@ def get_temp_changes(T_left, T_right, T_fuel):
     delta_T_left = get_delta_T(dQ_left, unit_mass_wall, c_wall)
     delta_T_right = get_delta_T(dQ_right, unit_mass_wall, c_wall)
 
-    c_fuel = gas_fluid_properties.get_fuel_properties(T_fuel, 1500000, CO, 2) #need specific heat of fuel to work out temp rise
+    c_fuel = gas_fluid_properties.get_fuel_properties(T_fuel, 1500000, O2, 2)[0] #need specific heat of fuel to work out temp rise
     delta_T_fuel = get_delta_T(dQ_fuel, unit_mass_fluid, c_fuel)
 
     return delta_T_left, delta_T_right, delta_T_fuel
@@ -109,16 +110,22 @@ def simulate():
     T_R = T_wall0*np.ones(n_nodes) #temperature of nodes representing right side of wall (next to cooling channel)
     T_f = T_f0*np.ones(n_nodes) #temperature of nodes representing fluid in cooling channel 
     time = 0
+    counter = 0
 
     #simulation loop
     while time < burn_time:
-        print('whatsss gooooood')
         dT_L, dT_R, dT_f = get_temp_changes(T_L, T_R, T_f) #calculate all the stuff and change the temperatures accordingly
         T_L += dT_L
         T_R += dT_R 
         T_f += dT_f
         T_f = shift_array(T_f) #shift the fluid temperature array since the fluid flows innit
         time += dt
+        counter += 1 
+        if counter%300 == 0:
+            print(f"time = {time}")
+            print(f"average fluid temp = {np.mean(T_f)}")
+            print(f"average hot wall temp = {np.mean(T_L)}")
+    
     return T_L, T_R, T_f 
 
 def main():
@@ -132,6 +139,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
