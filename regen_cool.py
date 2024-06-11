@@ -16,7 +16,7 @@ burn_time = 200 #[s]
 dt = 0.01 #[s] - timestep used for simulation 
 
 #geometry/wall
-D_c = 0.1 #diameter of chamber [m] #MAKE MORE ACCURATE LATER 
+D_c = 0.04125 #diameter of chamber [m]
 D_f = 0.008 #diameter of fuel cooland channels [m]
 t = 0.01 #thickness of engine between combustion and cooling channel [m] 
 l_tot = 0.7 #total length of cooling channel [m]
@@ -30,16 +30,16 @@ unit_area = unit_length*unit_width #[m^2] #this is area for heat transfer, not c
 unit_mass_wall = unit_area*t*rho_wall/2 #mass per node of wall used to calculate temp increase, /2 because there are 2 nodes: left and right
 
 #thermal/fluid
-T_c = 3300 #combustion temperature [K] #IMPORT FROM PREV FILE?
+T_c = 3300 #combustion temperature [K]
 T_wall0 = 293 #initial wall temperature [K]
 T_f0 = 100 #initial fuel temperature [K]
 gamma_c, mach_c, Cp_c, mu_c, k_c, Pr_c = gas_fluid_properties.get_combustion_properties() #fetch properties of gas in combustion chamber 
 r = Pr_c**(1/3) #EDIT LATER TO DIFFERENCIATE COMBUSTION CHAMBER AND THROAT 
 T_aw = T_c*(1 + r*0.5*(gamma_c-1)*(mach_c**2)) #ablative wall temperature [K] (accounts for fluid slowing down near wall)
-mdot_c = 0.529 #total mass flow [kg/s] (from SSOT)
+mdot_c = 0.151 #total mass flow [kg/s] (from SSOT)
 OF = 0.5714 #O/F ratio [-] taken from SSOT
 mdot_f = mdot_c/(OF + 1) #mass flow of fuel [kg/s]  #CHECK IF CORRECT 
-eta_c = 0.92 #combustion efficiency [-] #from sparrow paper, perform sensitivity analysis later 
+eta_c = 0.88 #combustion efficiency [-] #from sparrow paper, perform sensitivity analysis later
 unit_mass_fluid = unit_length*np.pi*((0.5*D_f)**2)*gas_fluid_properties.get_fuel_properties(T_f0, 1500000, CO, 2)[1] #[kg], we'll just assume constant density throughout the process for the unit mass
 
 dt = unit_mass_fluid/mdot_f #maybe I'm stupid but I do this so that in one time step 1 unit mass shifts from 1 node to the next so that all the properties can like shift down the array 
