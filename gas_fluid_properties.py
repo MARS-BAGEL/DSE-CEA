@@ -61,7 +61,7 @@ def get_CO_dynamic_visc(temp, stage):
         print('Please enter a valid stage number (1 or 2)')    
         exit() 
 
-    temp = round(temp) #round to nearest int to match with data 
+    temp = np.round(temp) #round to nearest int to match with data 
     index = np.where(temps == temp)[0]
     mu = viscosity_values[index][0] #[Pa*s]
     return mu
@@ -94,7 +94,7 @@ def get_CO_conductivity(temp, stage):
         print('Please enter a valid stage number (1 or 2)')    
         exit() 
         
-    temp = round(temp) #round to nearest int to match with data 
+    temp = np.round(temp) #round to nearest int to match with data 
     index = np.where(temps == temp)[0]
     k = conductivity_values[index][0] #[W/m*k]
     return k
@@ -102,6 +102,8 @@ def get_CO_conductivity(temp, stage):
 def get_fuel_properties(temp, pressure, substance, stage):
     cp = CP.PropsSI('C', 'T', temp, 'P', pressure, substance) #get the Cp in [J/kg/K]  #DOUBLE CHECK UNITS
     rho = CP.PropsSI('D', 'T', temp, 'P', pressure, substance) #get density in [kg/m^3]
-    mu = get_CO_dynamic_visc(temp, stage) #get dynamic viscocity in [Pa-s] 
-    k = get_CO_conductivity(temp, stage) #get thermal conductivity in [kW/m/K]
+    mu = CP.PropsSI('V', 'T', temp, 'P', pressure, substance) #get dynamic viscocity in [Pa-s] 
+    k = CP.PropsSI('L', 'T', temp, 'P', pressure, substance) #get thermal conductivity in [W/m/K]
+    # mu = get_CO_dynamic_visc(temp, stage) #get dynamic viscocity in [Pa-s] 
+    # k = get_CO_conductivity(temp, stage) #get thermal conductivity in [kW/m/K]
     return cp, rho, mu, k
