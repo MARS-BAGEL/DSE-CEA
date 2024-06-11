@@ -112,6 +112,7 @@ def get_temp_changes(T_left, T_right, T_fuel):
 def simulate():
     while time < burn_time:
         T_L, T_R, T_f += get_temp_changes(T_L, T_R, T_f)
+        
     return 0 
 
 
