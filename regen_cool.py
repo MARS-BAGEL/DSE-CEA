@@ -4,6 +4,7 @@ import gas_fluid_properties
 import CoolProp.CoolProp as CP
 
 CO = 'CarbonMonoxide'
+#start of array is at nozzle exit, end of array is at injector, this way it follows the flow of fuel
 
 #############################
 #______input parameters_____#
@@ -13,6 +14,7 @@ CO = 'CarbonMonoxide'
 stage = 2 #enter 1 for first stage engine, 2 for second stage engine
 burn_time = 200 #[s]
 dt = 0.01 #[s] - timestep used for simulation 
+time = 0 #[s] - start time
 
 #geometry/wall
 D_c = 0.1 #diameter of chamber [m] #MAKE MORE ACCURATE LATER 
@@ -45,6 +47,17 @@ dt = unit_mass_fluid/mdot_f #maybe I'm stupid but I do this so that in one time 
 
 
 #############################
+#Set up initial temperature arrays
+#############################
+
+T_L = T_wall0*np.ones(n_nodes) #temperature of nodes representing left side of wall (next to combustion chamber)
+
+T_R = T_wall0*np.ones(n_nodes) #temperature of nodes representing right side of wall (next to cooling channel)
+
+T_f = T_f0*np.ones(n_nodes) #temperature of nodes representing fluid in cooling channel 
+
+
+#############################
 #Define other functions
 #############################
 
@@ -69,18 +82,17 @@ def get_convective_heat_transfer(T_hot, T_cold, coefficient): #returns heat tran
 def get_conductive_heat_transfer(T_hot, T_cold): #returns heat transfer [W] due to conductive process
     return (k_wall*(T_hot - T_cold)*unit_area)/t 
 
-def get_temp_change(Q, m, c):
+def get_delta_T(Q, m, c):
     delta_T = (Q*dt)/(m*c)
     return delta_T
 
 
-def perform_step(T_left, T_right, T_f):
-
+def get_temp_changes(T_left, T_right, T_fuel):
     #calculate all the heat transfers  
     h_alpha_hot = get_gas_convectivity(T_left) #convectivity between combustion chamber and wall 
-    h_alpha_cold = get_fuel_convectivity(T_f, 1500000, CO, 2) #convectivity between fuel and wall 
+    h_alpha_cold = get_fuel_convectivity(T_fuel, 1500000, CO, 2) #convectivity between fuel and wall 
     Q_convection_hot = get_convective_heat_transfer(T_aw, T_left, h_alpha_hot) #heat transfered [W] between wall and comubstion gas
-    Q_convection_cold = get_convective_heat_transfer(T_right, T_f, h_alpha_cold) #heat transfered [W] between wall and fuel
+    Q_convection_cold = get_convective_heat_transfer(T_right, T_fuel, h_alpha_cold) #heat transfered [W] between wall and fuel
     Q_conduction = get_conductive_heat_transfer(T_left, T_right)
 
     #work out net heat added/lost for each node 
@@ -89,27 +101,19 @@ def perform_step(T_left, T_right, T_f):
     dQ_fuel = Q_convection_cold #fuel gains heat via convection with wall
 
     #then work out the temperature changes 
-    delta_T_left = get_temp_change(dQ_left, unit_mass_wall, c_wall)
-    delta_T_right = get_temp_change(dQ_right, unit_mass_wall, c_wall)
+    delta_T_left = get_delta_T(dQ_left, unit_mass_wall, c_wall)
+    delta_T_right = get_delta_T(dQ_right, unit_mass_wall, c_wall)
 
-    c_f = gas_fluid_properties.get_fuel_properties(T_f, 1500000, CO, 2) #need specific heat of fuel to work out temp rise
-    delta_T_fuel = get_temp_change(dQ_fuel, unit_mass_fluid, c_f)
+    c_fuel = gas_fluid_properties.get_fuel_properties(T_fuel, 1500000, CO, 2) #need specific heat of fuel to work out temp rise
+    delta_T_fuel = get_delta_T(dQ_fuel, unit_mass_fluid, c_fuel)
 
     return delta_T_left, delta_T_right, delta_T_fuel
 
+def simulate():
+    while time < burn_time:
+        T_L, T_R, T_f += get_temp_changes(T_L, T_R, T_f)
+    return 0 
 
-    
-    
-
-#############################
-#Set up initial temperature arrays
-#############################
-
-T_L = T_wall0*np.ones(n_nodes) #temperature of nodes representing left side of wall (next to combustion chamber)
-
-T_R = T_wall0*np.ones(n_nodes) #temperature of nodes representing right side of wall (next to cooling channel)
-
-T_f = T_f0*np.ones(n_nodes) #temperature of nodes representing fluid in cooling channel 
 
 
 
