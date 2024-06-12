@@ -107,3 +107,4 @@ def get_fuel_properties(temp, pressure, substance, stage):
     # mu = get_CO_dynamic_visc(temp, stage) #get dynamic viscocity in [Pa-s] 
     # k = get_CO_conductivity(temp, stage) #get thermal conductivity in [kW/m/K]
     return cp, rho, mu, k
+

@@ -2,6 +2,7 @@ import numpy as np
 from rocketcea.cea_obj import CEA_Obj, add_new_fuel
 import gas_fluid_properties
 import CoolProp.CoolProp as CP
+import prop_dimension
 
 CO = 'CarbonMonoxide'
 O2 = 'OXYGEN'
@@ -16,11 +17,11 @@ stage = 2 #enter 1 for first stage engine, 2 for second stage engine
 burn_time = 200 #[s]
 
 #geometry/wall
-D_c = 0.1 #diameter of chamber [m] #MAKE MORE ACCURATE LATER 
 D_f = 0.008 #diameter of fuel coolant channels [m]
 t = 0.003 #thickness of engine between combustion and cooling channel [m] 
-l_engine = 1.0 #total length of engine [m]
-l_tot = 0.7 #total length of cooling channel [m]
+l_engine = 0.40369 #total length of engine [m]
+channel_gap = 0.02  #[m] - gap between cooling channel loops
+l_tot = prop_dimension.get_cooling_channel_length(stage, channel_gap) #total length of cooling channel [m]
 n_nodes = 100 #number of different nodes the channel is split into for simulation [-]
 k_wall = 6.5 #thermal conductivity of wall [W/m*K] https://www.azom.com/article.aspx?ArticleID=4459
 rho_wall = 8220 #[kg/m^3] - density of material used for chamber wall
@@ -29,6 +30,10 @@ unit_length = l_tot/n_nodes #[m] #CHANGE THIS LATER
 unit_width = D_f #used for getting the area of a node for heat transfer [m]
 unit_area = unit_length*unit_width #[m^2] #this is area for heat transfer, not cross sectional area of cooling channel
 unit_mass_wall = unit_area*t*rho_wall/2 #mass per node of wall used to calculate temp increase, /2 because there are 2 nodes: left and right
+
+#set up array of diameter values
+D_c = np.linspace(0, 1, n_nodes)
+D_c = prop_dimension.get_diameter_from_distance_along_channel(D_c, l_engine, stage)
 
 #thermal/fluid
 T_c = 3300 #combustion temperature [K] #IMPORT FROM PREV FILE?
