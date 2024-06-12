@@ -74,7 +74,6 @@ def get_cooling_channel_length(stage, channel_gap): #this is rough asf broski de
         while distance <= 0.40369:
             tot_length += get_diameter(distance, stage)
             distance += channel_gap 
-            print('propagating')
     tot_length *= 0.5 #I'm pretty sure I gotta do this cuz of the way the channel spirals and isn't just a series of circles 
 
     return tot_length
