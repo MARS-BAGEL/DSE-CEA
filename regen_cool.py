@@ -11,19 +11,16 @@ O2 = 'OXYGEN'
 #############################
 #______input parameters_____#
 #############################
-
 #general 
 stage = 2 #enter 1 for first stage engine, 2 for second stage engine
 burn_time = 170 #[s]   #for 2nd stage it's 170s + 20s, for first stage assume for now 190s ig
 
 #geometry/wall
-D_f = 0.008 #diameter of fuel coolant channels [m]
-t = 0.01 #thickness of engine between combustion and cooling channel [m] 
-l_engine = 0.40369 #total length of engine [m]
+D_f = 0.002 #diameter of fuel coolant channels [m]
+t = 0.001 #thickness of engine between combustion and cooling channel [m] 
 channel_gap = 0.02  #[m] - gap between cooling channel loops
 l_tot = prop_dimension.get_cooling_channel_length(stage, channel_gap) #total length of cooling channel [m]
-print(l_tot)
-n_nodes = 100 #number of different nodes the channel is split into for simulation [-]
+n_nodes = 20 #number of different nodes the channel is split into for simulation [-]
 k_wall = 6.5 #thermal conductivity of wall [W/m*K] https://www.azom.com/article.aspx?ArticleID=4459
 rho_wall = 8220 #[kg/m^3] - density of material used for chamber wall
 c_wall = 435 #[J/kg*K] - specific heat of wall material https://www.matweb.com/search/datasheet_print.aspx?matguid=94950a2d209040a09b89952d45086134
@@ -31,11 +28,8 @@ unit_length = l_tot/n_nodes #[m] #CHANGE THIS LATER
 unit_width = D_f #used for getting the area of a node for heat transfer [m]
 unit_area = unit_length*unit_width #[m^2] #this is area for heat transfer, not cross sectional area of cooling channel
 unit_mass_wall = unit_area*t*rho_wall/2 #mass per node of wall used to calculate temp increase, /2 because there are 2 nodes: left and right
+D_c = 0.1086 #[m] - avg engine diameter (use 0.15916 for first stage, 0.1086 for second stage)
 
-#set up array of diameter values
-D_c = np.linspace(0, 1, n_nodes)
-D_c = prop_dimension.get_diameter_from_distance_along_channel(D_c, l_engine, stage)
-D_c = 0.1
 
 #thermal/fluid
 T_c = 3300 #combustion temperature [K] #IMPORT FROM PREV FILE?
@@ -65,6 +59,7 @@ def get_fuel_convectivity(temp, pressure, substance, stage): #returns convective
     Pr = 0.75 + 1.63/(np.log10(1 + Pr/0.0015)) #correct prandtl number for turbulence
     Nu = 0.023*(Re**0.8)*(Pr**0.4) #Nusselt number
     h_alpha = (k*Nu)/D_f #convective heat transfer coefficient [W/m^2*K]
+    #print(np.mean(Re))
     return h_alpha 
 
 def get_gas_convectivity(T_left):  #returns convective heat transfer coefficient for combustion gas
@@ -84,10 +79,11 @@ def get_delta_T(Q, m, c):
 
 
 def get_temp_changes(T_left, T_right, T_fuel):
-    #calculate all the heat transfers  
+    #1 - calculate all the heat transfers  
     h_alpha_hot = get_gas_convectivity(T_left) #convectivity between combustion chamber and wall 
     h_alpha_cold = get_fuel_convectivity(T_fuel, fuel_pressure, O2, stage) #convectivity between fuel and wall 
-    Q_convection_hot = get_convective_heat_transfer(T_aw, T_left, h_alpha_hot) #heat transfered [W] between wall and comubstion gas
+    
+    Q_convection_hot = 10*get_convective_heat_transfer(T_aw, T_left, h_alpha_hot) #heat transfered [W] between wall and comubstion gas
     Q_convection_cold = get_convective_heat_transfer(T_right, T_fuel, h_alpha_cold) #heat transfered [W] between wall and fuel
     Q_conduction = get_conductive_heat_transfer(T_left, T_right)
 
@@ -128,6 +124,7 @@ def simulate():
         T_f += dT_f
         T_f = shift_array(T_f) #shift the fluid temperature array since the fluid flows innit
         time += dt
+
         counter += 1 
         if counter%300 == 0:
             print(f"time = {time}")
